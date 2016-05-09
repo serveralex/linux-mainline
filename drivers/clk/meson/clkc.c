@@ -197,6 +197,20 @@ meson_clk_register_fixed_rate(const struct clk_conf *clk_conf,
 	return clk;
 }
 
+static struct clk * __init
+meson_clk_register_gate(const struct clk_conf *clk_conf,
+			      void __iomem *clk_base, spinlock_t *lock)
+{
+	return clk_register_gate(NULL, clk_conf->clk_name, 
+			clk_conf->num_parents
+				? clk_conf->clks_parent[0] : NULL,
+			clk_conf->flags, 
+			clk_base + clk_conf->reg_off, 
+			clk_conf->conf.gate.bit_idx, 
+			0, 
+			lock);
+}
+
 void __init meson_clk_register_clks(const struct clk_conf *clk_confs,
 				    unsigned int nr_confs,
 				    void __iomem *clk_base)
@@ -227,6 +241,10 @@ void __init meson_clk_register_clks(const struct clk_conf *clk_confs,
 		case CLK_PLL:
 			clk = meson_clk_register_pll(clk_conf, clk_base,
 						     &clk_lock);
+			break;
+		case CLK_GATE:
+			clk = meson_clk_register_gate(clk_conf, clk_base, 
+							 &clk_lock);
 			break;
 		default:
 			clk = NULL;

@@ -85,6 +85,10 @@ struct composite_conf {
 	u8			gate_flags;
 };
 
+struct gate_conf {
+	u8			bit_idx;
+};
+
 #define PNAME(x) static const char *x[]
 
 enum clk_type {
@@ -93,6 +97,7 @@ enum clk_type {
 	CLK_COMPOSITE,
 	CLK_CPU,
 	CLK_PLL,
+	CLK_GATE,
 };
 
 struct clk_conf {
@@ -109,6 +114,7 @@ struct clk_conf {
 		const struct composite_conf		*composite;
 		struct pll_conf			*pll;
 		const struct clk_div_table	*div_table;
+		const struct gate_conf		gate;
 	} conf;
 };
 
@@ -174,6 +180,18 @@ struct clk_conf {
 		.num_parents			= ARRAY_SIZE(_cp),	\
 		.flags				= (_f),			\
 		.conf.composite			= (_c),			\
+	}								\
+
+#define GATE(_ro, _ci, _cn, _cp, _f, _bi)				\
+	{								\
+		.reg_off			= (_ro),		\
+		.clk_type			= CLK_GATE,		\
+		.clk_id				= (_ci),		\
+		.clk_name			= (_cn),		\
+		.clks_parent			= (_cp),		\
+		.num_parents			= ARRAY_SIZE(_cp),	\
+		.flags				= (_f),			\
+		.conf.gate.bit_idx		= (_bi),		\
 	}								\
 
 struct clk **meson_clk_init(struct device_node *np, unsigned long nr_clks);
